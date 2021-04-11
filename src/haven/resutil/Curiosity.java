@@ -35,7 +35,7 @@ import static haven.QualityList.SingleType.*;
 
 public class Curiosity extends ItemInfo.Tip {
     public final int exp, mw, enc, time;
-    public transient final int lph;
+    public transient final int lph, lphw;
 
     public Curiosity(Owner owner, int exp, int mw, int enc, int time) {
 	super(owner);
@@ -44,6 +44,7 @@ public class Curiosity extends ItemInfo.Tip {
 	this.enc = enc;
 	this.time = time;
 	this.lph = (exp > 0 && time > 0) ? (3600 * exp / time) : 0;
+	this.lphw = (exp > 0 && time > 0 && mw > 0) ? ((3600 * exp / time) / mw) : 0;
     }
 
     static String[] units = {"s", "m", "h", "d"};
@@ -76,6 +77,7 @@ public class Curiosity extends ItemInfo.Tip {
         return CFG.REAL_TIME_CURIO.get() ? ((int) (Timer.SERVER_RATIO * lph)) : lph;
     }
 
+
     public BufferedImage tipimg() {
 	StringBuilder buf = new StringBuilder();
 	if(exp > 0)
@@ -88,6 +90,7 @@ public class Curiosity extends ItemInfo.Tip {
 	}
 	if(CFG.SHOW_CURIO_LPH.get() && lph > 0){
 	    buf.append(String.format("LP/H: $col[192,255,255]{%d}\n", lph(this.lph)));
+	    buf.append(String.format("LP/H/W: $col[192,255,255]{%d}\n", this.lphw));
 	}
 	if(mw > 0)
 	    buf.append(String.format("Mental weight: $col[255,192,255]{%d}\n", mw));
