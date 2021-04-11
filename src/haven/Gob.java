@@ -29,6 +29,8 @@ package haven;
 import java.util.*;
 import java.util.function.*;
 import haven.render.*;
+import integrations.mapv4.MappingClient;
+
 import static haven.OCache.*;
 
 public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Skeleton.HasPose {
@@ -48,12 +50,14 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     private final Object removalLock = new Object();
     private GobDamageInfo damage;
     private Hitbox hitbox;
+    private Boolean isMe = null;
+    private GobWarning warning = null;
     public static final ChangeCallback CHANGED = new ChangeCallback() {
 	@Override
 	public void added(Gob ob) {
 	
 	}
-    
+ 
 	@Override
 	public void removed(Gob ob) {
 	    ob.dispose();
@@ -214,6 +218,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	    addDmg();
 	}
 	setattr(new GeneralGobInfo(this));
+	updwait(this::drawableUpdated, waiting -> {});
     }
 
     public Gob(Glob glob, Coord2d c) {
@@ -248,6 +253,13 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	updstate();
 	if(virtual && ols.isEmpty() && (getattr(Drawable.class) == null))
 	    glob.oc.remove(this);
+    
+	if(isMe == null) {
+	    isMe();
+	    if(isMe != null) {
+		updateTags();
+	    }
+	}
     }
 
     public void gtick(Render g) {
@@ -372,8 +384,23 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	Moving m = getattr(Moving.class);
 	if(m != null)
 	    m.move(c);
+	if(Boolean.TRUE.equals(isMe()) && CFG.AUTOMAP_TRACK.get()) {
+	    MappingClient.getInstance().CheckGridCoord(c);
+	    MappingClient.getInstance().Track(id, c);
+	}
 	this.rc = c;
 	this.a = a;
+    }
+    
+    public Boolean isMe() {
+	if(isMe == null) {
+	    if(glob.sess.ui.gui == null || glob.sess.ui.gui.map == null || glob.sess.ui.gui.map.plgob < 0) {
+		return null;
+	    } else {
+		isMe = id == glob.sess.ui.gui.map.plgob;
+	    }
+	}
+	return isMe;
     }
 
     public Coord3f getc() {
@@ -443,6 +470,8 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 		prev.dispose();
 	    if(ac == Drawable.class) {
 		if(a != prev) drawableUpdated();
+	    } else if(ac == KinInfo.class) {
+		updateTags();
 	    } else if(ac == GobHealth.class) {
 		GeneralGobInfo info = getattr(GeneralGobInfo.class);
 		if(info != null) {
@@ -715,6 +744,13 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	return(null);
     }
     
+    public String resid() {
+	Drawable d = getattr(Drawable.class);
+	if(d != null)
+	    return d.resId();
+	return null;
+    }
+    
     private static final ClassResolver<Gob> ctxr = new ClassResolver<Gob>()
 	.add(Glob.class, g -> g.glob)
 	.add(Session.class, g -> g.glob.sess);
@@ -875,14 +911,21 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	h.start();
     }
     
+    public String tooltip() {
+        return resid();
+    }
+    
     public void drawableUpdated() {
+	if(updateseq == 0) {return;}
 	updateTags();
 	updateHitbox();
+	updateIcon();
 	updateTreeVisibility();
     }
     
     public void updateHitbox() {
-	Boolean hitboxEnabled = CFG.DISPLAY_GOB_HITBOX.get();
+	if(updateseq == 0) {return;}
+	boolean hitboxEnabled = CFG.DISPLAY_GOB_HITBOX.get() || is(GobTag.HIDDEN);
 	if(hitboxEnabled) {
 	    if(hitbox != null) {
 		hitbox.updateState();
@@ -897,12 +940,28 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     }
     
     public void updateTreeVisibility() {
+	if(updateseq == 0) {return;}
 	if(anyOf(GobTag.TREE, GobTag.BUSH)) {
 	    Drawable d = getattr(Drawable.class);
 	    Boolean needHide = CFG.HIDE_TREES.get();
 	    if(d != null && d.skipRender != needHide) {
 		d.skipRender = needHide;
 		glob.loader.defer(() -> setattr(d), null);
+		if(needHide) {
+		    tag(GobTag.HIDDEN);
+		} else {
+		    untag(GobTag.HIDDEN);
+		}
+		updateHitbox();
+	    }
+	}
+    }
+    
+    public void updateIcon() {
+	if(getattr(GobIcon.class) == null) {
+	    GobIcon icon = Radar.getIcon(this);
+	    if(icon != null) {
+		setattr(icon);
 	    }
 	}
     }
@@ -911,10 +970,32 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     
     private final Set<GobTag> tags = new HashSet<>();
     
-    private void updateTags() {
-	synchronized (tags) {
-	    tags.clear();
-	    tags.addAll(GobTag.tags(this));
+    public void updateTags() {
+	if(updateseq == 0) {return;}
+	Set<GobTag> tags = GobTag.tags(this);
+	synchronized (this.tags) {
+	    this.tags.clear();
+	    this.tags.addAll(tags);
+	}
+	updateWarnings();
+    }
+    
+    public void tag(GobTag tag) {
+	synchronized (this.tags) { this.tags.add(tag); }
+    }
+    
+    public void untag(GobTag tag) {
+	synchronized (this.tags) { this.tags.remove(tag); }
+    }
+    
+    private void updateWarnings() {
+	if(updateseq == 0) {return;}
+	if(!anyOf(GobTag.AGGRESSIVE, GobTag.FOE)) {
+	    warning = null;
+	    delattr(GobWarning.class);
+	} else if(warning == null) {
+	    warning = new GobWarning(this);
+	    setattr(warning);
 	}
     }
     

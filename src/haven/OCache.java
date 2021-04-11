@@ -60,6 +60,7 @@ public class OCache implements Iterable<Gob> {
     private HashMultiMap<Long, Gob> objs = new HashMultiMap<Long, Gob>();
     private Glob glob;
     private final Collection<ChangeCallback> cbs = new WeakList<ChangeCallback>();
+    public final PathVisualizer paths = new PathVisualizer();
 
     public interface ChangeCallback {
 	public void added(Gob ob);
@@ -68,8 +69,6 @@ public class OCache implements Iterable<Gob> {
 
     public OCache(Glob glob) {
 	this.glob = glob;
-	Radar.clean();
-	callback(Radar.CHANGED);
 	callback(Gob.CHANGED);
 	CFG.DISPLAY_GOB_HITBOX.observe(cfg -> gobAction(Gob::updateHitbox));
 	CFG.DISPLAY_GOB_HITBOX_TOP.observe(cfg -> gobAction(Gob::updateHitbox));
@@ -140,6 +139,7 @@ public class OCache implements Iterable<Gob> {
 	    copy.forEach(task);
 	else
 	    copy.parallelStream().forEach(task);
+	paths.tick(dt);
     }
 
     public void gtick(Render g) {
@@ -248,11 +248,10 @@ public class OCache implements Iterable<Gob> {
 	if((d != null) && (d.res == res) && !d.sdt.equals(sdt) && (d.spr != null) && (d.spr instanceof Sprite.CUpd)) {
 	    ((Sprite.CUpd)d.spr).update(sdt);
 	    d.sdt = sdt;
+	    g.drawableUpdated();
 	} else if((d == null) || (d.res != res) || !d.sdt.equals(sdt)) {
 	    g.setattr(new ResDrawable(g, res, sdt));
-	    Radar.add(g, res);
 	}
-	g.drawableUpdated();
     }
     public Delta cres(Message msg) {
 	int resid = msg.uint16();
@@ -333,7 +332,6 @@ public class OCache implements Iterable<Gob> {
 	if((cmp == null) || !cmp.base.equals(base)) {
 	    cmp = new Composite(g, base);
 	    g.setattr(cmp);
-	    Radar.add(g, cmp.base);
 	}
     }
     public Delta composite(Message msg) {
@@ -351,6 +349,7 @@ public class OCache implements Iterable<Gob> {
 		cmp.chposes(poses, interp);
 	    if(tposes != null)
 		cmp.tposes(tposes, WrapMode.ONCE, ttime);
+	    g.drawableUpdated();
 	}
     }
     public Delta cmppose(Message msg) {
@@ -398,6 +397,7 @@ public class OCache implements Iterable<Gob> {
 	if(cmp == null)
 	    throw(new RuntimeException(String.format("cmpmod on non-composed object: %s", mod)));
 	cmp.chmod(mod);
+	g.drawableUpdated();
     }
     public Delta cmpmod(Message msg) {
 	List<Composited.MD> mod = new LinkedList<Composited.MD>();

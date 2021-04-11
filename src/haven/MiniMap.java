@@ -602,8 +602,8 @@ public class MiniMap extends Widget {
     public void drawparts(GOut g){
 	drawmap(g);
 	drawmarkers(g);
-	if(CFG.MMAP_GRID.get()) {drawgrid(g);}
-	if(CFG.MMAP_VIEW.get()) {drawview(g);}
+	if(zoomlevel <= 2 && CFG.MMAP_GRID.get()) {drawgrid(g);}
+	if(zoomlevel <= 1 && CFG.MMAP_VIEW.get()) {drawview(g);}
 	if(dlvl <= 1)
 	    drawicons(g);
 	drawparty(g);
@@ -808,13 +808,15 @@ public class MiniMap extends Widget {
 		mv.wdgmsg("click", mc,
 			  loc.tc.sub(sessloc.tc).mul(tilesz).add(tilesz.div(2)).floor(posres),
 			  button, ui.modflags());
-	    else
+	    else {
+		if(button == 3) {FlowerMenu.lastGob(gob);}
 		mv.wdgmsg("click", mc,
 			  loc.tc.sub(sessloc.tc).mul(tilesz).add(tilesz.div(2)).floor(posres),
 			  button, ui.modflags(), 0,
 			  (int)gob.id,
 			  gob.rc.floor(posres),
 			  0, -1);
+	    }
 	}
     }
     
@@ -903,6 +905,7 @@ public class MiniMap extends Widget {
 		    }
 		}
 	    }
+	    if(newbiome == null) {newbiome = "???";}
 	    if(!newbiome.equals(biome)) {
 		biome = newbiome;
 		biometex = Text.renderstroked(prettybiome(biome)).tex();
