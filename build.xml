@@ -139,7 +139,7 @@
       <sysproperty key="haven.resurl" value="https://game.havenandhearth.com/res/" />
       <sysproperty key="haven.cachebase" value="http://game.havenandhearth.com/render/" />
       <sysproperty key="haven.mapbase" value="http://game.havenandhearth.com/java/" />
-      <sysproperty key="haven.dbtext" value="on" />
+      <sysproperty key="haven.dbtext" value="off" />
     </java>
   </target>
   
