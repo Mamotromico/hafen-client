@@ -6,5 +6,6 @@
       <maximumStackSize value="8" />
       <executeOn event="beforeCompilation" target="jars" />
     </buildFile>
+    <buildFile url="file://$PROJECT_DIR$/../MamoHavenUpdater/build.xml" />
   </component>
 </project>
