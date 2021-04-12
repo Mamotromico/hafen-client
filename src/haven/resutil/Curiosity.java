@@ -90,6 +90,9 @@ public class Curiosity extends ItemInfo.Tip {
 	}
 	if(CFG.SHOW_CURIO_LPH.get() && lph > 0){
 	    buf.append(String.format("LP/H: $col[192,255,255]{%d}\n", lph(this.lph)));
+	    
+	}
+	if(CFG.SHOW_CURIO_LPHW.get() && lphw > 0){
 	    buf.append(String.format("LP/H/W: $col[192,255,255]{%d}\n", this.lphw));
 	}
 	if(mw > 0)

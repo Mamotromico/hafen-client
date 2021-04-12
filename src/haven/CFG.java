@@ -53,6 +53,7 @@ public class CFG<T> {
     public static final CFG<Map<String, Map<String, Boolean>>> WARN_CONFIG = new CFG<>("general.warning", new HashMap<>());
     public static final CFG<Boolean> REAL_TIME_CURIO = new CFG<>("ui.real_time_curio", false);
     public static final CFG<Boolean> SHOW_CURIO_LPH = new CFG<>("ui.show_curio_lph", false);
+    public static final CFG<Boolean> SHOW_CURIO_LPHW = new CFG<>("ui.show_curio_lphw", false);
     public static final CFG<Boolean> SHOW_CURIO_REMAINING_TT = new CFG<>("ui.show_curio_remaining_tt", true);
     public static final CFG<Boolean> SHOW_CURIO_REMAINING_METER = new CFG<>("ui.show_curio_remaining_meter", false);
     public static final CFG<Boolean> SHOW_ITEM_DURABILITY = new CFG<>("ui.item_durability", false);
