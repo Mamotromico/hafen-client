@@ -2088,6 +2088,7 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	}
 	
 	protected void hit(Coord pc, Coord2d mc, ClickData inf) {
+	    if(Config.center_tile) { mc = mc.floor(tilesz).mul(tilesz).add(5, 5); }
 	    Object[] args = {pc, mc.floor(posres), clickb, ui.modflags()};
 	    
 	    if(inf != null) {
@@ -2105,8 +2106,23 @@ public class MapView extends PView implements DTarget, Console.Directory {
 		}
 	    }
 	    if(clickb == 1) {Bot.cancel();}
-	    wdgmsg("click", args);
+	    
+	    click(mc, clickb, args);
 	}
+    }
+    
+    public void click(Coord2d mc, int clickb, Object... args) {
+	boolean send = true;
+	if(clickb == 1 && CFG.QUEUE_PATHS.get()) {
+	    if(ui.modmeta) {
+		args[3] = 0;
+		send = ui.gui.pathQueue.add(mc);
+	    } else {
+		ui.gui.pathQueue.start(mc);
+	    }
+	}
+	if(send)
+	    wdgmsg("click", args);
     }
     
     public void grab(Grabber grab) {
@@ -2128,8 +2144,10 @@ public class MapView extends PView implements DTarget, Console.Directory {
 	    }
 	} else if((placing_l != null) && placing_l.done()) {
 	    Plob placing = placing_l.get();
-	    if(placing.lastmc != null)
-		wdgmsg("place", placing.rc.floor(posres), (int)Math.round(placing.a * 32768 / Math.PI), button, ui.modflags());
+	    if(placing.lastmc != null) {
+		wdgmsg("place", placing.rc.floor(posres), (int) Math.round(placing.a * 32768 / Math.PI), button, ui.modflags());
+		ui.gui.pathQueue.start(placing.rc);
+	    }
 	} else if((grab != null) && grab.mmousedown(c, button)) {
 	} else {
 	    new Click(c, button).run();

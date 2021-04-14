@@ -381,6 +381,9 @@ public class FlowerMenu extends Widget {
     }
 
     public void choose(int num) {
+        if(num != -1 && target != null) {
+	    ui.gui.pathQueue.start(target.rc);
+	}
 	if(num != -1 && PICK_ALL.equals(options[num])) {
 	    if(target != null) {
 		try {
@@ -389,6 +392,7 @@ public class FlowerMenu extends Widget {
 	    }
 	    num = -1;
 	}
+	target = null;
 	wdgmsg("cl", num, ui.modflags());
     }
 }

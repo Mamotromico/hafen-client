@@ -14,10 +14,10 @@ public class Hitbox extends GAttrib implements RenderTree.Node, Rendered {
     private final Model model;
     private static final Map<Resource, Model> MODEL_CACHE = new HashMap<>();
     private static final float Z = 0.1f;
-    private static final Color SOLID_COLOR = new Color(180, 134, 255, 255);
+    private static final Color SOLID_COLOR = new Color(178, 71, 178, 255);
     private static final Color PASSABLE_COLOR = new Color(105, 207, 124, 255);
-    private static final float PASSABLE_WIDTH = 1f;
-    private static final float SOLID_WIDTH = 2f;
+    private static final float PASSABLE_WIDTH = 1.5f;
+    private static final float SOLID_WIDTH = 3f;
     private static final Pipe.Op TOP = Pipe.Op.compose(Rendered.last, States.Depthtest.none, States.maskdepth);
     private static final Pipe.Op SOLID = Pipe.Op.compose(new BaseColor(SOLID_COLOR), new States.LineWidth(SOLID_WIDTH));
     private static final Pipe.Op PASSABLE = Pipe.Op.compose(new BaseColor(PASSABLE_COLOR), new States.LineWidth(PASSABLE_WIDTH));
@@ -82,7 +82,7 @@ public class Hitbox extends GAttrib implements RenderTree.Node, Rendered {
 		    if(state == 17 || state == 33) { // this fire is actually hearth fire
 			return true;
 		    }
-		} else if(name.equals("gfx/terobjs/arch/cellardoor")) {
+		} else if(name.equals("gfx/terobjs/arch/cellardoor") || name.equals("gfx/terobjs/fishingnet")) {
 		    return true;
 		}
 	    }
