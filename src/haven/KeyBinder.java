@@ -81,6 +81,7 @@ public class KeyBinder {
 	add(KeyEvent.VK_X, ALT,   OPEN_CRAFT_DB);
 	add(KeyEvent.VK_H, ALT,   TOGGLE_CURSOR);
 	add(KeyEvent.VK_S, ALT,   TOGGLE_STUDY);
+	add(KeyEvent.VK_J, ALT,   TOGGLE_SCRIPTS);
 	add(KeyEvent.VK_F, ALT,   FILTER);
 	add(KeyEvent.VK_I, ALT,   TOGGLE_GOB_INFO);
 	add(KeyEvent.VK_H, CTRL,  TOGGLE_GOB_HITBOX);

@@ -31,6 +31,7 @@ import haven.rx.BuffToggles;
 import haven.rx.Reactor;
 import integrations.mapv4.MappingClient;
 import me.ender.timer.Timer;
+import xyz.mamotromico.ScriptWnd;
 
 import java.util.*;
 import java.util.function.*;
@@ -40,10 +41,8 @@ import java.awt.image.BufferedImage;
 import java.awt.image.WritableRaster;
 import java.util.List;
 
-import static haven.Action.*;
 import static haven.Inventory.*;
 import static haven.ItemFilter.*;
-import static haven.KeyBinder.*;
 
 public class GameUI extends ConsoleHost implements Console.Directory {
     public static final Text.Foundry msgfoundry = new Text.Foundry(Text.dfont, 14);
@@ -95,6 +94,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
     public ActWindow craftlist, buildlist, actlist;
     public TimerPanel timers;
     public StudyWnd studywnd;
+    public ScriptWnd scriptwnd;
     public Observable menuObservable = new Observable(){
 	@Override
 	public void notifyObservers(Object arg) {
@@ -273,6 +273,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	closeWindow(craftlist); craftlist = null;
 	closeWindow(buildlist); buildlist = null;
 	closeWindow(studywnd); studywnd = null;
+	closeWindow(scriptwnd); scriptwnd = null;
     }
 
     public static final KeyBinding kb_srch = KeyBinding.get("scm-srch", KeyMatch.nil);
@@ -453,6 +454,15 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	super.dispose();
     }
     
+    public void toggleScripts() {
+	if(scriptwnd == null) {
+		scriptwnd = add(new ScriptWnd());
+	} else if (scriptwnd.visible) {
+	    scriptwnd.hide();
+	} else {
+	    scriptwnd.show();
+	}
+    }
 
     public void toggleCraftList() {
 	if(craftlist == null){
