@@ -52,7 +52,7 @@ public class FlowerMenu extends Widget {
     private static Gob target;
     public final String[] options;
     private Petal autochoose;
-    private String forceChoose;
+    private String[] forceChoose;
     public Petal[] opts;
     private UI.Grab mg, kg;
 
@@ -265,6 +265,7 @@ public class FlowerMenu extends Widget {
     @Override
     protected void attach(UI ui) {
 	super.attach(ui);
+	ui.pathQueue().ifPresent(PathQueue::unclick);
 	opts = new Petal[options.length];
 	for(int i = 0; i < options.length; i++) {
 	    String name = options[i];
@@ -299,15 +300,19 @@ public class FlowerMenu extends Widget {
 	return false;
     }
     
-    public void forceChoose(String opt) {
+    public void forceChoose(String ...opt) {
 	forceChoose = opt;
     }
     
     private boolean forceChoose() {
 	for (int i = 0; i < options.length; i++) {
-	    if(forceChoose != null && forceChoose.equals(options[i])) {
-		autochoose = opts[i];
-		return true;
+	    if(forceChoose != null) {
+		for (String s : forceChoose) {
+		    if(s != null && s.equals(options[i])) {
+			autochoose = opts[i];
+			return true;
+		    }
+		}
 	    }
 	}
 	return false;
@@ -381,9 +386,7 @@ public class FlowerMenu extends Widget {
     }
 
     public void choose(int num) {
-        if(num != -1 && target != null) {
-	    ui.gui.pathQueue.start(target.rc);
-	}
+	if(num != -1) { ui.pathQueue().ifPresent(pathQueue -> pathQueue.click(target));	}
 	if(num != -1 && PICK_ALL.equals(options[num])) {
 	    if(target != null) {
 		try {

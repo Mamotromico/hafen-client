@@ -53,7 +53,8 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     private final Collection<ResAttr.Load> lrdata = new LinkedList<ResAttr.Load>();
     private final Object removalLock = new Object();
     private GobDamageInfo damage;
-    private Hitbox hitbox;
+    private HidingGobSprite<Hitbox> hitbox = null;
+    public Drawable drawable;
     private Boolean isMe = null;
     private final GeneralGobInfo info;
     private GobWarning warning = null;
@@ -507,6 +508,7 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	    if(prev != null)
 		prev.dispose();
 	    if(ac == Drawable.class) {
+		drawable = (Drawable) a;
 		if(a != prev) drawableUpdated();
 	    } else if(ac == KinInfo.class) {
 		tagsUpdated();
@@ -760,28 +762,21 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
     }
 
     public Resource getres() {
-	Drawable d = getattr(Drawable.class);
+	Drawable d = drawable;
 	if(d != null)
 	    return(d.getres());
 	return(null);
     }
 
     public Skeleton.Pose getpose() {
-	Drawable d = getattr(Drawable.class);
+	Drawable d = drawable;
 	if(d != null)
 	    return(d.getpose());
 	return(null);
     }
-
-    public Indir<Resource> getires(){
-	Drawable d = getattr(Drawable.class);
-	if(d != null)
-	    return(d.getires());
-	return(null);
-    }
     
     public String resid() {
-	Drawable d = getattr(Drawable.class);
+	Drawable d = drawable;
 	if(d != null)
 	    return d.resId();
 	return null;
@@ -956,14 +951,18 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 	boolean hitboxEnabled = CFG.DISPLAY_GOB_HITBOX.get() || is(GobTag.HIDDEN);
 	if(hitboxEnabled) {
 	    if(hitbox != null) {
-		hitbox.updateState();
+		if(!hitbox.show(true)) {
+		    hitbox.fx.updateState();
+		}
 	    } else if(!virtual || this instanceof MapView.Plob) {
-		hitbox = Hitbox.forGob(this);
-		if(hitbox != null) setattr(hitbox);
+		Hitbox hitbox = Hitbox.forGob(this);
+		if(hitbox != null) {
+		    this.hitbox = new HidingGobSprite<>(this, hitbox);
+		    addol(this.hitbox);
+		}
 	    }
 	} else if(hitbox != null) {
-	    hitbox = null;
-	    delattr(Hitbox.class);
+	    hitbox.show(false);
 	}
     }
     
@@ -1189,8 +1188,6 @@ public class Gob implements RenderTree.Node, Sprite.Owner, Skeleton.ModOwner, Sk
 		}
 	    }
 	}
-	if(glob.sess.ui.gui != null && glob.sess.ui.gui.pathQueue != null) {
-	    glob.sess.ui.gui.pathQueue.movementChange(this, prev, a);
-	}
+	glob.sess.ui.pathQueue().ifPresent(pathQueue -> pathQueue.movementChange(this, prev, a));
     }
 }
