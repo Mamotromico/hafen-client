@@ -2123,11 +2123,11 @@ public class CharWnd extends WindowX {
 		}
 
 		protected void depress() {
-		    Audio.play(Button.lbtdown.stream());
+		    ui.sfx(Button.lbtdown.stream());
 		}
 
 		protected void unpress() {
-		    Audio.play(Button.lbtup.stream());
+		    ui.sfx(Button.lbtup.stream());
 		}
 	    }
 
@@ -2315,7 +2315,7 @@ public class CharWnd extends WindowX {
 		if(args[a] instanceof byte[])
 		    t.sdt = new MessageBuf((byte[])args[a++]);
 		double m = ((Number)args[a++]).doubleValue();
-		ui.sess.character.constipation.update(t.res, m);
+		ui.sess.character.constipation.update(t, m);
 		cons.update(t, m);
 	    }
 	} else if(nm == "csk") {

@@ -1621,8 +1621,9 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	msg(msg, color, color);
 	if(sfx != null) {Audio.play(sfx);}
     }
-
+    
     public static final Resource errsfx = Resource.local().loadwait("sfx/error");
+    private double lasterrsfx = 0;
     public void error(String msg) {
 	msg(msg, MsgType.ERROR);
     }
@@ -1633,7 +1634,7 @@ public class GameUI extends ConsoleHost implements Console.Directory {
 	msg(msg, MsgType.INFO);
 	double now = Utils.rtime();
 	if(now - lastmsgsfx > 0.1) {
-	    Audio.play(msgsfx);
+	    ui.sfx(msgsfx);
 	    lastmsgsfx = now;
 	}
     }

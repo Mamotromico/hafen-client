@@ -769,6 +769,9 @@ public class OptWnd extends WindowX {
 	general.add(new CFGBox("Output missing translation lines", L10N.DBG), x, y);
     
 	y += STEP;
+	general.add(new CFGBox("Force hardware cursor", CFG.FORCE_HW_CURSOR, null, true), x, y);
+    
+	y += STEP;
 	tx = x + general.add(new Label("UI Theme:"), x, y).sz.x + UI.scale(5);
 	general.add(new Dropbox<Theme>(UI.scale(100), 5, UI.scale(16)) {
 	    @Override
@@ -882,6 +885,31 @@ public class OptWnd extends WindowX {
 		value.settext("");
 	    }
 	}, x + UI.scale(160), y - UI.scale(2));
+    
+	y += STEP;
+	tx = x + general.add(new Label("Hold to ignore auto choose:"), x, y).sz.x + UI.scale(5);
+	general.add(new Dropbox<UI.KeyMod>(UI.scale(100), 5, UI.scale(16)) {
+	    @Override
+	    protected UI.KeyMod listitem(int i) {
+		return UI.KeyMod.values()[i];
+	    }
+	
+	    @Override
+	    protected int listitems() {
+		return UI.KeyMod.values().length;
+	    }
+	
+	    @Override
+	    protected void drawitem(GOut g, UI.KeyMod item, int i) {
+		g.atext(item.name(), UI.scale(3, 8), 0, 0.5);
+	    }
+	
+	    @Override
+	    public void change(UI.KeyMod item) {
+		super.change(item);
+		if(!item.equals(CFG.MENU_SKIP_AUTO_CHOOSE.get())) CFG.MENU_SKIP_AUTO_CHOOSE.set(item, true);
+	    }
+	}, tx, y).change(CFG.MENU_SKIP_AUTO_CHOOSE.get());
     
 	my = Math.max(my, y);
     
@@ -1024,6 +1052,9 @@ public class OptWnd extends WindowX {
     
 	y += STEP;
 	display.add(new CFGBox("Always mark current target", CFG.ALWAYS_MARK_COMBAT_TARGET , "Usually current target only marked when there's more than one"), x, y);
+    
+	y += STEP;
+	display.add(new CFGBox("Auto peace on combat start", CFG.COMBAT_AUTO_PEACE , "Automatically enter peacfull mode on combat start id enemy is aggressive - useful for taming"), x, y);
 	
 	y += STEP;
 	display.add(new CFGBox("Show combat damage", CFG.SHOW_COMBAT_DMG), x, y);
