@@ -1,13 +1,16 @@
 package xyz.mamotromico;
 
-import haven.GOut;
-import haven.GameUI;
-import haven.Widget;
-import haven.Coord;
+import haven.*;
+import xyz.mamotromico.kbot.KREPL;
 
 public class ScriptWnd extends GameUI.Hidewnd {
+    KREPL engine;
     public ScriptWnd() {
         super(Coord.z, "Scripts");
+        engine = KREPL.getInstance();
+        add(new Button(UI.scale(100), "Run Script", false).action(() -> {
+        
+        }), new Coord(0,5));
     }
     
     public static class ScriptList extends Widget {
@@ -25,7 +28,6 @@ public class ScriptWnd extends GameUI.Hidewnd {
         public void draw(GOut g) {
             upd();
             super.draw(g);
-            
         }
     }
 }
