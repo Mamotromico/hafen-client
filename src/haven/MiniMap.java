@@ -259,6 +259,9 @@ public class MiniMap extends Widget {
 	public void update(Coord2d rc, double ang) {
 	    this.rc = rc;
 	    this.ang = ang;
+	}
+
+	public void dispupdate() {
 	    if((this.rc == null) || (sessloc == null) || (dloc == null) || (dloc.seg != sessloc.seg))
 		this.sc = null;
 	    else
@@ -283,6 +286,10 @@ public class MiniMap extends Widget {
     
 	public boolean isPlayer() {
 	    return "gfx/hud/mmap/plo".equals(icon.res.get().name);
+	}
+	
+	public boolean isDead() {
+	    return gob.anyOf(GobTag.DEAD, GobTag.KO);
 	}
     }
 
@@ -506,6 +513,8 @@ public class MiniMap extends Widget {
 		file.lock.readLock().unlock();
 	    }
 	}
+	for(DisplayIcon icon : icons)
+	    icon.dispupdate();
     }
 
     public void drawgrid(GOut g, Coord ul, DisplayGrid disp) {
@@ -589,6 +598,8 @@ public class MiniMap extends Widget {
 	    if(disp.isPlayer()) {
 		g.chcolor(disp.kin() != null ? Color.WHITE : Color.RED);
 		g.aimage(RadarCFG.Symbols.$circle.tex, disp.sc, 0.5, 0.5);
+	    } else if (disp.isDead()) {
+	        img = disp.icon.imggray();
 	    }
 	    
 	    if(disp.col != null)
@@ -640,7 +651,7 @@ public class MiniMap extends Widget {
 	drawmap(g);
 	drawmarkers(g);
 	boolean playerSegment = (sessloc != null) && ((curloc == null) || (sessloc.seg == curloc.seg));
-	if(playerSegment && zoomlevel <= 2 && CFG.MMAP_GRID.get()) {drawgrid(g);}
+	if(zoomlevel <= 2 && CFG.MMAP_GRID.get()) {drawgrid(g);}
 	if(playerSegment && zoomlevel <= 1 && CFG.MMAP_VIEW.get()) {drawview(g);}
 	if(playerSegment && CFG.MMAP_SHOW_PATH.get()) {drawMovement(g);}
 	if(dlvl <= 1)
